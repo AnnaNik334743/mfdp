@@ -36,7 +36,7 @@
 | aanosov/asr_calls  | Content Cell  | Телефонные звонки  | [Russian Open Speech To Text (STT/ASR) Dataset](https://github.com/snakers4/open_stt) |
 | aanosov/common_voice_ru_test  | 4.3  | Краудсорсинговый проект Мозилы, всё, включая текст предложений собирается пользователями  | [Mozilla. Common Voice](https://commonvoice.mozilla.org/en/datasets) |
 |   |   |   |  |
-| aanosov/youtube_control_001  | 1  | На основе субтитров Youtube  | Собрано самостоятельно |
-| aanosov/habr_toloka_001  | 48.0  | Предложения, содержащиеся термины. На основе Хабр  | Собрано самостоятельно |
+| aanosov/youtube_control_001  | 1  | На основе субтитров Youtube, разметка доработана вручную  | Собрано самостоятельно |
+| aanosov/habr_toloka_001  | 48.0  | Предложения, содержащие термины. На основе Хабр  | Собрано самостоятельно |
 
 
