@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ASR Service Demo</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+  <div class="container col-7 mt-5">
+    <h1>ASR Service Demo</h1>
+  </div>
+
+  <div class="container col-7 mt-3 ">
+    <div id="formSelection">
+      <div class="btn-group" role="group" aria-label="Form Selection">
+        <input type="radio" class="btn-check" name="formType" id="recorderForm" autocomplete="off">
+        <label class="btn btn-outline-primary" for="recorderForm">Record Audio</label>
+        
+        <input type="radio" class="btn-check" name="formType" id="uploaderForm" autocomplete="off">
+        <label class="btn btn-outline-primary" for="uploaderForm">Upload File</label>
+      </div>
+    </div>
+  </div>
+
+  <div id="recorderContainer" class="container col-7 mt-3 border border-2 rounded-3 p-3" style="display: none;">
+    <div class="btn-group" role="group" aria-label="Record Controls">
+      <button id="startRecord" class="btn btn-outline-primary">Start Recording</button>
+      <button id="stopRecord" class="btn btn-outline-primary" disabled>Stop Recording</button>
+    </div>
+    <button id="submitRecord" class="btn btn-primary" disabled>Submit Recording</button>
+    <audio id="recordedAudio" style="display: none;"></audio>
+  </div>
+
+
+  <div id="uploaderContainer" class="container col-7 mt-3 border border-2 rounded-3 p-3" style="display: none;">
+    <div class="mb-3">
+      <label for="fileInput" class="form-label">Choose File:</label>
+      <input type="file" class="form-control" id="fileInput" onchange="updateFileNameLabel()">
+    </div>
+    <div class="mb-3">
+      <label for="numSpeakersInput" class="form-label">Number of Speakers:</label>
+      <input type="number" class="form-control" id="numSpeakersInput" value="1">
+    </div>
+    <button id="submitFile" class="btn btn-primary">Submit File</button>
+  </div>
+
+
+  <div id="ProcessMessage" class="container col-7 mt-3 border border-2 rounded-3 p-3" style="display: none;">
+  </div>
+
+  <div class="container col-7 mt-3 ">
+    <button id="tryAgainButton" class="btn btn-primary" style="display: none;">Try Again</button>
+  </div>
+
+  <div id="resultContainer" class="container col-7 mt-3 border border-2 rounded-3 p-3" style="display: none;">
+    <h2>Result:</h2>
+    <div class="mb-3">
+      <input type="text" id="fileNameInput" class="form-control" placeholder="File Name">
+    </div>
+    <div class="mb-3">
+      <textarea id="noteText" class="form-control" rows="5"></textarea>
+    </div>
+    <div class="mb-3">
+      <button id="saveButton" class="btn btn-primary">Save Note</button>
+    </div>
+  </div>
+
+
+  <div id="errorContainer" class="alert alert-danger col-7 mt-3" style="display: none;">
+    <strong>Error:</strong> <span id="errorMessage"></span>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      let mediaRecorder;
+      let recordedChunks = [];
+
+      $('#recorderForm').click(function() {
+        $('#uploaderContainer').hide();
+        $('#recorderContainer').show();
+      });
+
+      $('#uploaderForm').click(function() {
+        $('#recorderContainer').hide();
+        $('#uploaderContainer').show();
+      });
+
+      // Audio Recording
+      $('#startRecord').click(function() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function(stream) {
+            recordedChunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.addEventListener('dataavailable', function(e) {
+              recordedChunks.push(e.data);
+            });
+
+            mediaRecorder.start();
+            $('#startRecord').prop('disabled', true);
+            $('#stopRecord').prop('disabled', false);
+            $('#submitRecord').prop('disabled', true);
+            $('#ProcessMessage').show();
+            $('#ProcessMessage').text('Recording...');
+          })
+          .catch(function(err) {
+            console.log('Error: ' + err);
+          });
+      });
+
+      $('#stopRecord').click(function() {
+        mediaRecorder.stop();
+        $('#stopRecord').prop('disabled', true);
+        $('#startRecord').prop('disabled', false);
+        $('#submitRecord').prop('disabled', false);
+        $('#ProcessMessage').text('Recording stopped. Ready to submit.');
+      });
+
+      $('#submitRecord').click(function() {
+        const audioBlob = new Blob(recordedChunks, { 'type': 'audio/webm' });
+
+        const formData = new FormData();
+        formData.append('input_file', audioBlob, 'recorded_audio.webm');
+        const numSpeakersInput = document.getElementById('numSpeakersInput');
+        const numSpeakers = 1;
+        formData.append('num_speakers', numSpeakers);
+        sendFormData(formData);
+      });
+
+      // File Upload
+      $('#submitFile').click(function() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+
+        if (file) {
+          const formData = new FormData();
+          formData.append('input_file', file);
+          const numSpeakersInput = document.getElementById('numSpeakersInput');
+          const numSpeakers = parseInt(numSpeakersInput.value);
+          formData.append('num_speakers', numSpeakers);
+          sendFormData(formData);
+        } else {
+          console.log('No file selected.');
+        }
+      });
+
+      function sendFormData(formData) {
+        $('#ProcessMessage').text('Processing...');
+        $('#resultContainer').hide(); // Hide the result container
+        $('#errorContainer').hide(); // Hide the error container
+        $('#ProcessMessage').show();
+
+        $.ajax({
+          url: 'http://158.160.60.196:8080/asr_api',
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function(response) {
+            if (response.error) {
+              $('#errorMessage').text(response.error);
+              $('#errorContainer').show();
+            } else {
+              $('#noteText').val(response.result);
+              $('#ProcessMessage').text('Recognition completed');
+              $('#resultContainer').show();
+              $('#tryAgainButton').show();
+
+              // Hide the form selection, recorder container, and uploader container
+              $('#formSelection').hide();
+              $('#recorderContainer').hide();
+              $('#uploaderContainer').hide();
+            }
+            updateNoteTextAreaSize(); // Update the size of the noteText textarea
+          },
+          error: function(err) {
+            console.log('Error: ' + err);
+          }
+        });
+      }
+
+      $('#saveButton').click(function() {
+        const noteText = $('#noteText').val();
+        const fileNameInput = $('#fileNameInput').val();
+        const fileName = (fileNameInput.trim() !== '') ? fileNameInput.trim() : 'note.txt';
+        const blob = new Blob([noteText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      $('#tryAgainButton').click(function() {
+          $('#formSelection').show();
+          $('#recorderContainer').hide();
+          $('#uploaderContainer').hide();
+          $('#resultContainer').hide();
+          $('#errorContainer').hide();
+          $('#ProcessMessage').hide();
+          $(recorderForm).prop('checked', false);
+          $(uploaderForm).prop('checked', false);
+        });
+    });
+
+    function updateFileNameLabel() {
+      const fileInput = document.getElementById('fileInput');
+      const fileInputLabel = document.getElementById('fileInputLabel');
+      if (fileInput.files.length > 0) {
+        fileInputLabel.innerText = fileInput.files[0].name;
+      } else {
+        fileInputLabel.innerText = 'Choose File';
+      }
+    }
+    
+    function updateNoteTextAreaSize() {
+      const noteText = document.getElementById('noteText');
+      noteText.style.height = ''; // Reset the height to auto
+      noteText.style.height = noteText.scrollHeight + 'px'; // Set the height to the scroll height
+    }
+    
+    // Call the updateNoteTextAreaSize function when the window is resized
+    window.addEventListener('resize', updateNoteTextAreaSize);
+    
+    // Call the updateNoteTextAreaSize function when the noteText textarea content changes
+    $('#noteText').on('input', updateNoteTextAreaSize);
+  </script>
+</body>
+</html>
