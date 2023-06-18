@@ -1,7 +1,6 @@
 FROM python:3.10
 
 COPY ./requirements.txt /app/
-COPY ./whisper_pipelines_creation.py /app/
 
 WORKDIR /app
 
