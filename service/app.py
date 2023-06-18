@@ -45,6 +45,8 @@ async def form_post(input_file: UploadFile = File(...), num_speakers: int = Form
     pipe = pipeline('automatic-speech-recognition', 'whisper_tiny_pipeline')
     result = pipe(wav, chunk_length_s=30, generate_kwargs={"language": "<|ru|>", "task": "transcribe"})['text']
     return {'result': f"{result}"}
+
+    
         # except Exception as e:
         #     return {'error': 'fucking error'}
 
