@@ -29,7 +29,6 @@ def form_post(request: Request):
     return templates.TemplateResponse('index.html', context={'request': request})
 
 async def file_processing(input_bytes, filename):
-    if filename.split('.')[-1] in ['mp3', 'wav', 'm4a', 'aac', 'flac', 'aiff', 'ogg', 'opus', 'webm']:
         audio = AudioSegment.from_file(input_bytes, format=filename.split('.')[-1])
         wav_binary = io.BytesIO()
         audio.export(wav_binary, format="wav")
@@ -40,11 +39,19 @@ async def file_processing(input_bytes, filename):
 @app.post("/asr_api")
 async def form_post(input_file: UploadFile = File(...), num_speakers: int = Form(...)):
     print(num_speakers)
-    input_bytes = io.BytesIO(await input_file.read())
-    wav = await file_processing(input_bytes, input_file.filename.split('.')[-1])
-    pipe = pipeline('automatic-speech-recognition', 'whisper_tiny_pipeline')
-    result = pipe(wav, chunk_length_s=30, generate_kwargs={"language": "<|ru|>", "task": "transcribe"})['text']
-    return {'result': f"{result}"}
+    if  input_file.filename.split('.')[-1] in ['mp3', 'wav',  'aac', 'webm']:
+        input_bytes = io.BytesIO(await input_file.read())
+        wav = await file_processing(input_bytes, input_file.filename.split('.')[-1])
+        pipe = pipeline('automatic-speech-recognition', 'whisper_tiny_pipeline')
+        result = pipe(wav, chunk_length_s=30, generate_kwargs={"language": "<|ru|>", "task": "transcribe"})['text']
+        return {'result': f"{result}"}
+    else:
+        error = f"""К сожалению, на данный момент, платформа поддерживает только файлы в формате 
+        wav и mp3. Ваш файл в формате {input_file.filename.split('.')[-1]}.\n
+        Вы можете конвертировать файл самостоятельно, 
+        воспользовавшись различными онлайн сервисами."""
+        return {'error': f"{error}"}
+
 
     
         # except Exception as e:
