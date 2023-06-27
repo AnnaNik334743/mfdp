@@ -43,7 +43,7 @@
 * Список использованных видео с Youtube можно найти в файле ./huggingface_youtube/used_videos.csv
 
 
-# Test
+# Test_cleen
 
 | Название  | Продолжительность (часов) | Описание | Ссылка на источник |
 | ------------- | ------------- | ------------- | ------------- |
@@ -56,3 +56,15 @@
 | aanosov/habr_toloka_001  | (?)  | Предложения, содержащие термины. На основе Хабр  | Собрано самостоятельно |
 
 
+
+# Test_augmentated
+
+| Название  | Продолжительность (часов) | Описание |
+| ------------- | ------------- | ------------- |
+| aanosov/sova_test  | Content Cell  |
+| aanosov/golos_test  | 7.7  |   | 
+| aanosov/asr_calls  | 11.2  |   | 
+| aanosov/common_voice_ru_test  | 4.3  |   |
+|   |   |   | 
+| aanosov/youtube_control_001_aug  | 3  | увеличен в три раза  |
+| aanosov/habr_toloka_001  | (?)  | |
