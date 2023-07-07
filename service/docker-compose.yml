@@ -1,0 +1,96 @@
+x-logging: &default-logging
+  driver: loki
+  options:
+    loki-url: 'http://localhost:3100/api/prom/push'
+    loki-pipeline-stages: |
+      - multiline:
+          firstline: '^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}'
+          max_wait_time: 3s
+      - regex:
+          expression: '^(?P<time>\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2},d{3}) (?P<message>(?s:.*))$$'
+
+
+version: "3"
+
+services:
+
+  loki:
+    image: grafana/loki:2.8.0
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  asr_app:
+    build: asr_app/
+    ports:
+      - 8000:8000
+    depends_on:
+      - loki
+    volumes:
+      - ./asr_app:/app
+    logging: *default-logging
+
+  prometheus:
+    image: prom/prometheus:v2.42.0
+    volumes:
+      - ./etc/prometheus/:/workspace
+    command:
+      - --config.file=/workspace/prometheus.yml
+      - --enable-feature=exemplar-storage
+    ports:
+      - 9090:9090
+    depends_on:
+      - loki
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:9.4.7
+    ports:
+      - 3000:3000
+    volumes:
+      - ./etc/grafana/:/etc/grafana/provisioning/datasources
+      - ./etc/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./etc/dashboards:/etc/grafana/dashboards
+    depends_on:
+      - loki
+      - prometheus
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_FEATURE_TOGGLES_ENABLE: "traceqlEditor"
+
+  locust_master:
+    image: locustio/locust
+    ports:
+     - "8089:8089"
+    volumes:
+      - ./locustfile.py:/mnt/locust/locustfile.py
+      - ./test_audios/:/home/test_audios/
+    command: -f /mnt/locust/locustfile.py --master -H http://locust_master:8089
+
+  locust_worker:
+    image: locustio/locust
+    volumes:
+      - ./locustfile.py:/mnt/locust/locustfile.py
+      - ./test_audios/:/home/test_audios/
+    command: -f /mnt/locust/locustfile.py --worker --master-host locust_master
+  
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+
+
+
