@@ -1,47 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ASR Service Demo</title>
+  <title>Recognise IT!</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 </head>
 <body>
 
   <div class="container col-7 mt-5">
-    <h1>ASR Service Demo</h1>
+    <h1>Recognise IT!</h1>
   </div>
 
   <div class="container col-7 mt-3 ">
     <div id="formSelection">
       <div class="btn-group" role="group" aria-label="Form Selection">
         <input type="radio" class="btn-check" name="formType" id="recorderForm" autocomplete="off">
-        <label class="btn btn-outline-primary" for="recorderForm">Record Audio</label>
+        <label class="btn btn-outline-primary" for="recorderForm">Записать аудио</label>
         
         <input type="radio" class="btn-check" name="formType" id="uploaderForm" autocomplete="off">
-        <label class="btn btn-outline-primary" for="uploaderForm">Upload File</label>
+        <label class="btn btn-outline-primary" for="uploaderForm">Загрузить файл</label>
       </div>
     </div>
   </div>
 
   <div id="recorderContainer" class="container col-7 mt-3 border border-2 rounded-3 p-3" style="display: none;">
     <div class="btn-group" role="group" aria-label="Record Controls">
-      <button id="startRecord" class="btn btn-outline-primary">Start Recording</button>
-      <button id="stopRecord" class="btn btn-outline-primary" disabled>Stop Recording</button>
+      <button id="startRecord" class="btn btn-outline-primary">Начать запись</button>
+      <button id="stopRecord" class="btn btn-outline-primary" disabled>Остановить запись</button>
     </div>
-    <button id="submitRecord" class="btn btn-primary" disabled>Submit Recording</button>
+    <button id="submitRecord" class="btn btn-primary" disabled>Распознать текст</button>
     <audio id="recordedAudio" style="display: none;"></audio>
   </div>
 
 
   <div id="uploaderContainer" class="container col-7 mt-3 border border-2 rounded-3 p-3" style="display: none;">
     <div class="mb-3">
-      <label for="fileInput" class="form-label">Choose File:</label>
+      <label for="fileInput" class="form-label">Выберите файл:</label>
       <input type="file" class="form-control" id="fileInput" onchange="updateFileNameLabel()">
     </div>
     <div class="mb-3">
-      <label for="numSpeakersInput" class="form-label">Number of Speakers:</label>
+      <label for="numSpeakersInput" class="form-label">Количество спикеров:</label>
       <input type="number" class="form-control" id="numSpeakersInput" value="1">
     </div>
-    <button id="submitFile" class="btn btn-primary">Submit File</button>
+    <button id="submitFile" class="btn btn-primary">Распознать текст</button>
   </div>
 
 
@@ -49,27 +49,28 @@
   </div>
 
   <div class="container col-7 mt-3 ">
-    <button id="tryAgainButton" class="btn btn-primary" style="display: none;">Try Again</button>
+    <button id="tryAgainButton" class="btn btn-primary" style="display: none;">Распознать еще раз</button>
   </div>
 
   <div id="resultContainer" class="container col-7 mt-3 border border-2 rounded-3 p-3" style="display: none;">
-    <h2>Result:</h2>
+    <h2>Результат:</h2>
     <div class="mb-3">
-      <input type="text" id="fileNameInput" class="form-control" placeholder="File Name">
+      <input type="text" id="fileNameInput" class="form-control" placeholder="Введите имя файла">
     </div>
     <div class="mb-3">
       <textarea id="noteText" class="form-control" rows="5"></textarea>
     </div>
     <div class="mb-3">
-      <button id="saveButton" class="btn btn-primary">Save Note</button>
+      <button id="saveButton" class="btn btn-primary">Сохранить</button>
     </div>
   </div>
 
   <div id="errorContainer" class="container col-7 mt-3" style="display: none;">
     <div class="alert alert-danger" >
-      <strong>Error:</strong> <span id="errorMessage"></span>
+      <strong>Ошибка:</strong> <span id="errorMessage"></span>
     </div>
   </div>  
+
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -115,7 +116,7 @@
         $('#stopRecord').prop('disabled', true);
         $('#startRecord').prop('disabled', false);
         $('#submitRecord').prop('disabled', false);
-        $('#ProcessMessage').text('Recording stopped. Ready to submit.');
+        $('#ProcessMessage').text('Запись остановлена.');
       });
 
       $('#submitRecord').click(function() {
@@ -147,7 +148,7 @@
       });
 
       function sendFormData(formData) {
-        $('#ProcessMessage').text('Processing...');
+        $('#ProcessMessage').text('Идет распознавание...');
         $('#resultContainer').hide(); // Hide the result container
         $('#errorContainer').hide(); // Hide the error container
         $('#ProcessMessage').show();
@@ -165,7 +166,7 @@
               $('#ProcessMessage').hide();
             } else {
               $('#noteText').val(response.result);
-              $('#ProcessMessage').text('Recognition completed');
+              $('#ProcessMessage').text('Распознавание завершено.');
               $('#resultContainer').show();
               $('#tryAgainButton').show();
 
