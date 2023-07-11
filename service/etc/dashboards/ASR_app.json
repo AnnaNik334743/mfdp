@@ -155,7 +155,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 8,
         "x": 0,
         "y": 5
       },
@@ -256,7 +256,7 @@
       "gridPos": {
         "h": 8,
         "w": 9,
-        "x": 6,
+        "x": 8,
         "y": 5
       },
       "id": 12,
@@ -287,7 +287,7 @@
           "refId": "A"
         }
       ],
-      "title": "Request Per Sec",
+      "title": "Mean Requests Per Sec (last minute)",
       "type": "timeseries"
     },
     {
@@ -349,8 +349,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 9,
-        "x": 15,
+        "w": 7,
+        "x": 17,
         "y": 5
       },
       "id": 10,
@@ -411,7 +411,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
+        "w": 4,
         "x": 0,
         "y": 9
       },
@@ -475,8 +475,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
-        "x": 3,
+        "w": 4,
+        "x": 4,
         "y": 9
       },
       "hideTimeOverride": true,
@@ -1823,8 +1823,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "ASR app Observability",
+  "title": "ASR-app Dashboard",
   "uid": "dLsDQIUnz",
-  "version": 3,
+  "version": 1,
   "weekStart": ""
 }
